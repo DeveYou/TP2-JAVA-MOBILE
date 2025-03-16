@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,6 +25,7 @@ import com.example.pizza.services.ProduitService;
 public class ListPizzaActivity extends AppCompatActivity{
     private ListView liste;
     private ProduitService ps = new ProduitService();
+    private ImageView share;
 
     private static final String TAG = "ListPizzaActivity";
     @Override
@@ -36,6 +41,7 @@ public class ListPizzaActivity extends AppCompatActivity{
 
 
         liste  =  findViewById(R.id.liste);
+        share = findViewById(R.id.share);
 
         ps.create(new Produit("BARBECUED CHICKEN PIZZA", 3, R.mipmap.pizza1, "35 min", "- 2 boneless skinless chicken breast halves (6 ounces each)\n- 1/4 teaspoon pepper\n- 1 cup barbecue sauce, divided\n- 1 tube (13.8 ounces) refrigerated pizza crust\n- 2 teaspoons olive oil\n-2 cups shredded Gouda cheese\n-1 small red onion, halved and thinly sliced\n-1/4 cup minced fresh cilantro","So fast and so easy with refrigerated pizza crust, these saucy, smoky pizzas make quick fans with their hot-off-the-grill, rustic flavor. They're perfect for spur-of-the-moment cookouts and summer dinners on the patio. —Alicia Trevithick, Temecula, California","STEP 1:\n\n  Sprinkle chicken with pepper; place on an oiled grill rack over medium heat. Grill, covered, until a thermometer reads 165°, 5-7 minutes per side, basting frequently with 1/2 cup barbecue sauce during the last 4 minutes. Cool slightly. Cut into cubes.\n\nSTEP 2:\n\n  Divide dough in half. On a well-greased large sheet of heavy-duty foil, press each portion of dough into a 10x8-in. rectangle; brush lightly with oil. Invert dough onto grill rack; peel off foil. Grill, covered, over medium heat until bottom is lightly browned, 1-2 minutes.\n\nSTEP 3:\n\n  Remove from grill. Spread grilled sides with remaining barbecue sauce. Top with cheese, chicken and onion. Grill, covered, until bottom is lightly browned and cheese is melted, 2-3 minutes. Sprinkle with cilantro. Yield: 2 pizzas (4 pieces each)."));
 
@@ -66,9 +72,9 @@ public class ListPizzaActivity extends AppCompatActivity{
                 TextView pId = view.findViewById(R.id.id);
                 Produit selectedProduct = ps.findById(Integer.parseInt(pId.getText().toString()));
 
-
                 //debug
                 Log.d(TAG, "product id : " + pId.getText().toString());
+
 
                 intent.putExtra("nom", selectedProduct.getNom());
                 intent.putExtra("detailsIngredient", selectedProduct.getDetailsIngred());
@@ -82,6 +88,31 @@ public class ListPizzaActivity extends AppCompatActivity{
                 startActivity(intent);
             }
         });
+
+
+        share.setOnClickListener(
+                view -> {
+                    String shareText = "";
+
+                    for(Produit p : ps.findAll()){
+                        shareText += "Nom: " + p.getNom() + "\n\n" +
+                                "Ingredients: " + p.getDetailsIngred() + "\n\n" +
+                                "Description: " + p.getDescription() + "\n\n" +
+                                "Preparation: " + p.getPreparation()+ "\n\n";
+                    }
+
+                    //debug
+                    Log.d("ShareInfo", "Total products: " + ps.findAll().size());
+
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+
+                    shareIntent.setPackage("com.whatsapp");
+
+                    startActivity(shareIntent);
+                }
+        );
 
     }
 
